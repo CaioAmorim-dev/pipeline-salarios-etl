@@ -54,3 +54,35 @@ df["media_categoria"] = df.groupby("nivel_experiencia")["usd"].transform("mean")
 
 # Criando coluna com situação salarial (desvio percentual)
 df["situacao_salario"] = ((df["usd"] - df["media_categoria"]) / df["media_categoria"] * 100).round(2)
+
+
+# 5. Visualizações com Seaborn / Matplotlib
+
+# Gráfico de barras por nível de experiência
+sns.barplot(data=df, x="nivel_experiencia", y="usd")
+plt.title("Salário por Nível de Experiência (Gráfico Simples)")
+plt.show()
+
+# Contagem por nível de experiência
+df["nivel_experiencia"].value_counts().plot(kind="bar", title="Distribuição por Senioridade")
+plt.xlabel("Nível de Experiência")
+plt.ylabel("Quantidade")
+plt.show()
+
+# Salário por senioridade (ordenado)
+ordem = df.groupby("nivel_experiencia")["usd"].mean().sort_values(ascending=False).index
+plt.figure(figsize=(8, 5))
+sns.barplot(data=df, x="nivel_experiencia", y="usd", order=ordem)
+plt.xlabel("Senioridade")
+plt.ylabel("Salário (USD)")
+plt.title("Salário por Nível de Experiência")
+plt.show()
+
+# Histograma de salários
+plt.figure(figsize=(8, 5))
+sns.histplot(data=df["usd"], bins=100, kde=True)
+plt.title("Distribuição de Salários em USD")
+plt.xlabel("Salário (USD)")
+plt.ylabel("Frequência")
+plt.show()
+
