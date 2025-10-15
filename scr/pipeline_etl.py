@@ -43,3 +43,14 @@ tipo_contrato_traduzido = {
 }
 df["remoto"] = df["remoto"].map(tipo_contrato_traduzido)
 
+
+# 4. Tratamento de dados
+
+# Preenchendo valores nulos na coluna ano_trabalho
+df["ano_trabalho"] = df["ano_trabalho"].fillna(df["ano_trabalho"].mean()).round().astype(int)
+
+# Cálculo da média salarial por categoria de experiência
+df["media_categoria"] = df.groupby("nivel_experiencia")["usd"].transform("mean").round()
+
+# Criando coluna com situação salarial (desvio percentual)
+df["situacao_salario"] = ((df["usd"] - df["media_categoria"]) / df["media_categoria"] * 100).round(2)
