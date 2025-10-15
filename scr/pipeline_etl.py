@@ -23,3 +23,23 @@ df.rename(columns={
     'company_size': 'porte_empresa'
 }, inplace=True)
 
+
+# 3. Traduzindo valores categóricos
+
+# Nível de experiência
+senioridade_traduzida = {
+    'EN': 'Junior',
+    'MI': 'Pleno',
+    'SE': 'Sênior',
+    'EX': 'Executivo'
+}
+df["nivel_experiencia"] = df["nivel_experiencia"].map(senioridade_traduzida)
+
+# Tipo de trabalho remoto
+tipo_contrato_traduzido = {
+    0: 'Presencial',
+    50: 'Híbrido',
+    100: 'Remoto'
+}
+df["remoto"] = df["remoto"].map(tipo_contrato_traduzido)
+
