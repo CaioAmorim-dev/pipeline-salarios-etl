@@ -86,3 +86,28 @@ plt.xlabel("Salário (USD)")
 plt.ylabel("Frequência")
 plt.show()
 
+# 6. Visualizações com Plotly
+# Média salarial por senioridade (Plotly)
+senioridade_media_salario = df.groupby("nivel_experiencia")["usd"].mean().sort_values(ascending=False).reset_index()
+fig = px.bar(
+    senioridade_media_salario,
+    x="nivel_experiencia",
+    y="usd",
+    title="Média Salarial por Senioridade",
+    labels={"nivel_experiencia": "Nível de experiência", "usd": "Média Salarial Anual (USD)"}
+)
+fig.show()
+
+# Proporção dos tipos de trabalho remoto (Pie Chart)
+remoto_contagem = df["remoto"].value_counts().reset_index()
+remoto_contagem.columns = ["remoto", "quantidade"]
+
+fig = px.pie(
+    remoto_contagem,
+    names="remoto",
+    values="quantidade",
+    title="Proporção dos Tipos de Trabalho",
+    hole=0.6
+)
+fig.show()
+
