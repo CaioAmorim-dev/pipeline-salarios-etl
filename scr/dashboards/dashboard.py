@@ -69,21 +69,6 @@ with col_graf1:
         st.plotly_chart(grafico_cargos, use_container_width=True)
     else:
         st.warning("Nenhum dado para ser exibido")
-st.write("Exemplo de valores únicos por coluna:")
-st.write("anos:", df["ano"].unique())
-st.write("senioridades:", df["senioridade"].unique())
-st.write("contratos:", df["contrato"].unique())
-st.write("tamanho_empresa:", df["tamanho_empresa"].unique())
-
-st.write("Filtros selecionados:")
-st.write("campo_anos:", campo_anos)
-st.write("campo_senioridade:", campo_senioridade)
-st.write("campo_contratos:", campo_contratos)
-st.write("campo_tamanho_empresa:", campo_tamanho_empresa)
-
-
-
-
 
 
 
