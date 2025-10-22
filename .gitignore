@@ -1,1 +1,9 @@
+# Ambiente virtual
 .venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Dados gerados
+dados_tratados.csv

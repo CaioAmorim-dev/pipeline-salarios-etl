@@ -1,39 +1,76 @@
+import os
+import sys
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import scr.pipelines.pipeline_etl as pipeline_etl
 
+# --- Ajusta caminho do projeto antes de importar módulos internos ---
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
+if ROOT_DIR not in sys.path:
+    sys.path.insert(0, ROOT_DIR)
 
+print(">>> Ajuste aplicado, ROOT_DIR:", ROOT_DIR)
+print(">>> sys.path[:3]:", sys.path[:3])
+# -------------------------------------------------------------------
+
+try:
+    import scr.pipelines.pipeline_etl as pipeline_etl
+except ModuleNotFoundError as e:
+    st.error(f"Erro ao importar pipeline_etl: {e}")
+    st.stop()
+
+# ---------------------------------------------------------------
+# CONFIGURAÇÃO DA PÁGINA
+# ---------------------------------------------------------------
 st.set_page_config(
-    page_title = "Dashboard teste",
-    page_icon = "📊",
-    layout = "wide",
+    page_title="Dashboard teste",
+    page_icon="📊",
+    layout="wide",
 )
 
-df = pipeline_etl.carregar_dados_tratados("https://raw.githubusercontent.com/vqrca/dashboard_salarios_dados/refs/heads/main/dados-imersao-final.csv")  
+# ---------------------------------------------------------------
+# CARREGAMENTO DOS DADOS
+# ---------------------------------------------------------------
+df = pipeline_etl.carregar_dados_tratados(
+    "https://raw.githubusercontent.com/guilhermeonrails/data-jobs/refs/heads/main/salaries.csv"
+)
 
+# ---------------------------------------------------------------
+# SIDEBAR - FILTROS
+# ---------------------------------------------------------------
 anos_disponiveis = sorted(df["ano"].unique())
 campo_anos = st.sidebar.multiselect("Ano", anos_disponiveis, default=anos_disponiveis)
 
-senioridades_disponiveis = sorted(df["senioridade"].unique())
-campo_senioridade = st.sidebar.multiselect("Senioridade", senioridades_disponiveis ,default=senioridades_disponiveis)
+senioridades_disponiveis = sorted(df["nivel_experiencia"].unique())
+campo_senioridade = st.sidebar.multiselect("Senioridade", senioridades_disponiveis, default=senioridades_disponiveis)
 
-contratos_disponiveis = sorted(df["contrato"].unique())
-campo_contratos = st.sidebar.multiselect("contrato", contratos_disponiveis ,default=contratos_disponiveis)
+contratos_disponiveis = sorted(df["tipo_emprego"].unique())
+campo_contratos = st.sidebar.multiselect("Tipo de emprego", contratos_disponiveis, default=contratos_disponiveis)
 
-tamanho_empresas_disponiveis = sorted(df["tamanho_empresa"].unique())
-campo_tamanho_empresa = st.sidebar.multiselect("Tammanho da empresa", tamanho_empresas_disponiveis ,default=tamanho_empresas_disponiveis)
+tamanho_empresas_disponiveis = sorted(df["porte_empresa"].unique())
+campo_tamanho_empresa = st.sidebar.multiselect("Tamanho da empresa", tamanho_empresas_disponiveis, default=tamanho_empresas_disponiveis)
 
+# ---------------------------------------------------------------
+# FILTRAGEM DOS DADOS
+# ---------------------------------------------------------------
 df_selecionado = df[
     (df["ano"].isin(campo_anos)) &
-    (df["senioridade"].isin(campo_senioridade)) &
-    (df["contrato"].isin(campo_contratos)) &
-    (df["tamanho_empresa"].isin(campo_tamanho_empresa))
+    (df["nivel_experiencia"].isin(campo_senioridade)) &
+    (df["tipo_emprego"].isin(campo_contratos)) &
+    (df["porte_empresa"].isin(campo_tamanho_empresa))
 ]
 
-st.title("📈 Dashboard de análise de Salário na área de dados")
-st.markdown("Explore dados e conheça oportunidades da área de dados no mundo todo. Ultilize os filtros a direita para embasar sua pesquisa")
 
+# ---------------------------------------------------------------
+# LAYOUT PRINCIPAL
+# ---------------------------------------------------------------
+st.title("📈 Dashboard de Análise de Salário na Área de Dados")
+st.markdown("Explore dados e conheça oportunidades da área de dados no mundo todo. "
+            "Use os filtros à direita para personalizar sua análise.")
+
+# ---------------------------------------------------------------
+# MÉTRICAS PRINCIPAIS
+# ---------------------------------------------------------------
 if not df_selecionado.empty:
     salario_medio = df_selecionado["usd"].mean()
     salario_maximo = df_selecionado["usd"].max()
@@ -43,35 +80,36 @@ else:
     salario_maximo, salario_medio, total_registros, cargo_mais_frequente = 0, 0, 0, ""
     st.warning("Não há dados para os filtros selecionados!")
 
-
-col1, col2, col3,col4 = st.columns(4)
+col1, col2, col3, col4 = st.columns(4)
 col1.metric("Salário médio", f"${salario_medio:,.0f}")
 col2.metric("Salário máximo", f"${salario_maximo:,.0f}")
 col3.metric("Total de registros", f"{total_registros:,}")
 col4.metric("Cargo mais frequente", cargo_mais_frequente)
 st.markdown("---")
 
+# ---------------------------------------------------------------
+# GRÁFICOS
+# ---------------------------------------------------------------
 col_graf1, col_graf2 = st.columns(2)
+
 with col_graf1:
     if not df_selecionado.empty:
-        top_cargos = df_selecionado.groupby("cargo")["usd"].mean().nlargest(10).sort_values(ascending= True).reset_index()
-        grafico_cargos = px.bar(
-            data_frame= top_cargos,
-            x = "usd",
-            y = "cargo",
-            orientation= "h",
-            title= "Top 10 cargos por salário médio",
-            labels={"usd" :"Media de Salário anual","cargo" : "Cargos"}
+        top_cargos = (
+            df_selecionado.groupby("cargo")["usd"]
+            .mean()
+            .nlargest(10)
+            .sort_values(ascending=True)
+            .reset_index()
         )
-        grafico_cargos.update_layout(title_x=0.1, yaxis={"categoryorder" : "total ascending"})
+        grafico_cargos = px.bar(
+            data_frame=top_cargos,
+            x="usd",
+            y="cargo",
+            orientation="h",
+            title="Top 10 cargos por salário médio",
+            labels={"usd": "Média salarial anual (USD)", "cargo": "Cargo"},
+        )
+        grafico_cargos.update_layout(title_x=0.1, yaxis={"categoryorder": "total ascending"})
         st.plotly_chart(grafico_cargos, use_container_width=True)
     else:
-        st.warning("Nenhum dado para ser exibido")
-
-
-
-
-
-
-
-
+        st.warning("Nenhum dado disponível para exibir.")

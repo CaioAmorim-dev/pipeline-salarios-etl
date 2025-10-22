@@ -9,7 +9,7 @@ def carregar_dados_tratados(base_dados):
 
     # 2. Renomeando colunas
     df.rename(columns={
-        'work_year': 'ano_trabalho',
+        'work_year': 'ano',
         'experience_level': 'nivel_experiencia',
         'employment_type': 'tipo_emprego',
         'job_title': 'cargo',
@@ -31,7 +31,11 @@ def carregar_dados_tratados(base_dados):
         'SE': 'Sênior',
         'EX': 'Executivo'
     }
-    df["nivel_experiencia"] = df["nivel_experiencia"].map(senioridade_traduzida)
+    if "nivel_experiencia" in df.columns:
+        df["nivel_experiencia"] = df["nivel_experiencia"].map(senioridade_traduzida)
+    else:
+        # Se a coluna não existir, cria como valor padrão ou copia de outra coluna
+        df["nivel_experiencia"] = "Desconhecido"
 
     # Tipo de trabalho remoto
     tipo_contrato_traduzido = {
@@ -44,7 +48,7 @@ def carregar_dados_tratados(base_dados):
 
     # 4. Tratamento de dados
     # Preenchendo valores nulos na coluna ano_trabalho
-    df["ano_trabalho"] = df["ano_trabalho"].fillna(df["ano_trabalho"].mean()).round().astype(int)
+    df["ano"] = df["ano"].fillna(df["ano"].mean()).round().astype(int)
 
     # Cálculo da média salarial por categoria de experiência
     df["media_categoria"] = df.groupby("nivel_experiencia")["usd"].transform("mean").round()
