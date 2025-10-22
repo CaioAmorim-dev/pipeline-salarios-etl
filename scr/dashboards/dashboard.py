@@ -8,10 +8,6 @@ import plotly.express as px
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
 if ROOT_DIR not in sys.path:
     sys.path.insert(0, ROOT_DIR)
-
-print(">>> Ajuste aplicado, ROOT_DIR:", ROOT_DIR)
-print(">>> sys.path[:3]:", sys.path[:3])
-
 try:
     import scr.pipelines.pipeline_etl as pipeline_etl
 except ModuleNotFoundError as e:
