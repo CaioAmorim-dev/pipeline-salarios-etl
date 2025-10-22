@@ -4,14 +4,13 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# --- Ajusta caminho do projeto antes de importar módulos internos ---
+# Ajusta caminho do projeto antes de importar módulos internos 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
 if ROOT_DIR not in sys.path:
     sys.path.insert(0, ROOT_DIR)
 
 print(">>> Ajuste aplicado, ROOT_DIR:", ROOT_DIR)
 print(">>> sys.path[:3]:", sys.path[:3])
-# -------------------------------------------------------------------
 
 try:
     import scr.pipelines.pipeline_etl as pipeline_etl
@@ -19,25 +18,21 @@ except ModuleNotFoundError as e:
     st.error(f"Erro ao importar pipeline_etl: {e}")
     st.stop()
 
-# ---------------------------------------------------------------
+
 # CONFIGURAÇÃO DA PÁGINA
-# ---------------------------------------------------------------
 st.set_page_config(
     page_title="Dashboard teste",
     page_icon="📊",
     layout="wide",
 )
 
-# ---------------------------------------------------------------
 # CARREGAMENTO DOS DADOS
-# ---------------------------------------------------------------
 df = pipeline_etl.carregar_dados_tratados(
     "https://raw.githubusercontent.com/guilhermeonrails/data-jobs/refs/heads/main/salaries.csv"
 )
 
-# ---------------------------------------------------------------
+
 # SIDEBAR - FILTROS
-# ---------------------------------------------------------------
 anos_disponiveis = sorted(df["ano"].unique())
 campo_anos = st.sidebar.multiselect("Ano", anos_disponiveis, default=anos_disponiveis)
 
@@ -50,9 +45,8 @@ campo_contratos = st.sidebar.multiselect("Tipo de emprego", contratos_disponivei
 tamanho_empresas_disponiveis = sorted(df["porte_empresa"].unique())
 campo_tamanho_empresa = st.sidebar.multiselect("Tamanho da empresa", tamanho_empresas_disponiveis, default=tamanho_empresas_disponiveis)
 
-# ---------------------------------------------------------------
+
 # FILTRAGEM DOS DADOS
-# ---------------------------------------------------------------
 df_selecionado = df[
     (df["ano"].isin(campo_anos)) &
     (df["nivel_experiencia"].isin(campo_senioridade)) &
@@ -61,16 +55,14 @@ df_selecionado = df[
 ]
 
 
-# ---------------------------------------------------------------
+
 # LAYOUT PRINCIPAL
-# ---------------------------------------------------------------
 st.title("📈 Dashboard de Análise de Salário na Área de Dados")
 st.markdown("Explore dados e conheça oportunidades da área de dados no mundo todo. "
             "Use os filtros à direita para personalizar sua análise.")
 
-# ---------------------------------------------------------------
+
 # MÉTRICAS PRINCIPAIS
-# ---------------------------------------------------------------
 if not df_selecionado.empty:
     salario_medio = df_selecionado["usd"].mean()
     salario_maximo = df_selecionado["usd"].max()
@@ -87,9 +79,8 @@ col3.metric("Total de registros", f"{total_registros:,}")
 col4.metric("Cargo mais frequente", cargo_mais_frequente)
 st.markdown("---")
 
-# ---------------------------------------------------------------
+
 # GRÁFICOS
-# ---------------------------------------------------------------
 col_graf1, col_graf2 = st.columns(2)
 
 with col_graf1:
@@ -112,4 +103,38 @@ with col_graf1:
         grafico_cargos.update_layout(title_x=0.1, yaxis={"categoryorder": "total ascending"})
         st.plotly_chart(grafico_cargos, use_container_width=True)
     else:
+        st.warning("Nenhum dado disponível para exibir.")
+    
+with col_graf2:
+    if not df_selecionado.empty:
+        grafico_hist = px.histogram(
+            df_selecionado,
+            x="usd",
+            nbins=30,
+            title="Distribuição de salários anuais",
+            labels={"usd": "Faixa salarial (USD)", "count": ""}
+        )
+        grafico_hist.update_layout(title_x=0.1)
+        st.plotly_chart(grafico_hist, use_container_width=True)
+    else: 
+        st.warning("Nenhum dado para exibir no gráfico de distribuição")
+
+col_graf3, col_graf4 = st.columns(2)
+
+with col_graf3:
+    if not df_selecionado.empty:
+        salarios_ano = df_selecionado.groupby("ano")["usd"].mean().reset_index()
+        
+        grafico_salarios = px.line(
+        salarios_ano,
+        x="ano",
+        y="usd",
+        markers=True,
+        title="Aumento dos salarios com passar dos anos",
+        labels={"usd": "Faixa salarial (USD)", "ano": "ano"}
+        )
+        grafico_salarios.update_xaxes(range=[2020, 2025], dtick=1)
+        grafico_salarios.update_layout(title_x=0.1)
+        st.plotly_chart(grafico_salarios, use_container_width=True)
+    else:  
         st.warning("Nenhum dado disponível para exibir.")
