@@ -134,3 +134,20 @@ with col_graf3:
         st.plotly_chart(grafico_salarios, use_container_width=True)
     else:  
         st.warning("Nenhum dado disponível para exibir.")
+
+with col_graf4:
+    if not df_selecionado.empty:
+        df_ds = df_selecionado [df_selecionado["cargo"] == "Data Scientist"]
+        media_ds_pais = df_ds.groupby("residencia_is03")["usd"].mean().reset_index
+        grafico_paises = px.choropleth(
+            media_ds_pais,
+            locations="residencia_iso3",
+            color="usd",
+            color_continuous_scale="rdylgn",
+            title="Salario médio de Cientista de dados por pais",
+            labels={"usd": "Salario médio (USD)", "resindeica_iso3": "País"})
+        grafico_paises.update_layout(title_x=0.1)
+        st.ploty_chart(grafico_paises, use_container_with=True)
+    else:
+        st.warning("Nenhum dado para exibir no gráfico de países")
+        
