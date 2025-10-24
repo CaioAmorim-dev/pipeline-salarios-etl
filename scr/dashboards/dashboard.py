@@ -119,9 +119,9 @@ with col_graf2:
         st.plotly_chart(grafico_hist, use_container_width=True)
     else: 
         st.warning("Nenhum dado para exibir no gráfico de distribuição")
+        
 
 col_graf3, col_graf4 = st.columns(2)
-
 with col_graf3:
     if not df_selecionado.empty:
         salarios_ano = df_selecionado.groupby("ano")["usd"].mean().reset_index()
@@ -150,5 +150,24 @@ with col_graf4:
             title="Hierarquia de países, cargos e senioridades",)
         grafico_sunburst.update_layout(title_x=0.1)
         st.plotly_chart(grafico_sunburst, use_container_width=True)
+    else:
+        st.warning("Nenhum dado para exibir no gráfico de países")
+
+
+
+col_graf5 = st.columns(1)
+with col_graf5:
+    if not df_selecionado.empty:
+            df_ds = df_selecionado [df_selecionado["cargo"] == "Data Scientist"]
+            media_ds_pais = df_ds.groupby("residencia_is03")["usd"].mean().reset_index
+            grafico_paises = px.choropleth(
+                media_ds_pais,
+                locations="residencia_iso3",
+                color="usd",
+                color_continuous_scale="rdylgn",
+                title="Salario médio de Cientista de dados por pais",
+                labels={"usd": "Salario médio (USD)", "resindeica_iso3": "País"})
+            grafico_paises.update_layout(title_x=0.1)
+            st.ploty_chart(grafico_paises, use_container_with=True)
     else:
         st.warning("Nenhum dado para exibir no gráfico de países")
