@@ -4,6 +4,9 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
+# .\.venv\Scripts\activate
+# streamlit run scr\dashboards\dashboard.py
+
 # Ajusta caminho do projeto antes de importar módulos internos 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
 if ROOT_DIR not in sys.path:
@@ -23,9 +26,15 @@ st.set_page_config(
 )
 
 # CARREGAMENTO DOS DADOS
-df = pipeline_etl.carregar_dados_tratados(
-    "https://raw.githubusercontent.com/guilhermeonrails/data-jobs/refs/heads/main/salaries.csv"
-)
+
+try:
+    df = pipeline_etl.carregar_dados_tratados(
+        "https://raw.githubusercontent.com/guilhermeonrails/data-jobs/refs/heads/main/salaries.csv"
+    )
+except Exception as e:
+    st.warning(f"Erro ao carregar dados online ({e}). Carregando backup local...")
+    df = pd.read_csv("data/salaries.csv")
+
 
 
 # SIDEBAR - FILTROS
@@ -82,11 +91,7 @@ col_graf1, col_graf2 = st.columns(2)
 with col_graf1:
     if not df_selecionado.empty:
         top_cargos = (
-            df_selecionado.groupby("cargo")["usd"]
-            .mean()
-            .nlargest(10)
-            .sort_values(ascending=True)
-            .reset_index()
+            df_selecionado.groupby("cargo")["usd"].mean().nlargest(10).sort_values(ascending=True).reset_index()
         )
         grafico_cargos = px.bar(
             data_frame=top_cargos,
@@ -120,14 +125,13 @@ col_graf3, col_graf4 = st.columns(2)
 with col_graf3:
     if not df_selecionado.empty:
         salarios_ano = df_selecionado.groupby("ano")["usd"].mean().reset_index()
-        
         grafico_salarios = px.line(
-        salarios_ano,
-        x="ano",
-        y="usd",
-        markers=True,
-        title="Aumento dos salarios com passar dos anos",
-        labels={"usd": "Faixa salarial (USD)", "ano": "ano"}
+            salarios_ano,
+            x="ano",
+            y="usd",
+            markers=True,
+            title="Aumento dos salarios com passar dos anos",
+            labels={"usd": "Faixa salarial (USD)", "ano": "ano"}
         )
         grafico_salarios.update_xaxes(range=[2020, 2025], dtick=1)
         grafico_salarios.update_layout(title_x=0.1)
@@ -137,17 +141,14 @@ with col_graf3:
 
 with col_graf4:
     if not df_selecionado.empty:
-        df_ds = df_selecionado [df_selecionado["cargo"] == "Data Scientist"]
-        media_ds_pais = df_ds.groupby("residencia_is03")["usd"].mean().reset_index
-        grafico_paises = px.choropleth(
-            media_ds_pais,
-            locations="residencia_iso3",
+        grafico_sunburst = px.sunburst(
+            df_selecionado,
+            path=["residencia_iso3", "cargo", "nivel_experiencia"],
+            values="usd",
             color="usd",
-            color_continuous_scale="rdylgn",
-            title="Salario médio de Cientista de dados por pais",
-            labels={"usd": "Salario médio (USD)", "resindeica_iso3": "País"})
-        grafico_paises.update_layout(title_x=0.1)
-        st.ploty_chart(grafico_paises, use_container_with=True)
+            color_continuous_scale="RdBu",
+            title="Hierarquia de países, cargos e senioridades",)
+        grafico_sunburst.update_layout(title_x=0.1)
+        st.plotly_chart(grafico_sunburst, use_container_width=True)
     else:
         st.warning("Nenhum dado para exibir no gráfico de países")
-        
