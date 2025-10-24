@@ -29,8 +29,9 @@ st.set_page_config(
 
 try:
     df = pipeline_etl.carregar_dados_tratados(
-        "https://raw.githubusercontent.com/guilhermeonrails/data-jobs/refs/heads/main/salaries.csv"
-    )
+        base_url="https://raw.githubusercontent.com/guilhermeonrails/data-jobs/refs/heads/main/salaries.csv",
+        caminho_local="scr/data/salarios.csv"
+)
 except Exception as e:
     st.warning(f"Erro ao carregar dados online ({e}). Carregando backup local...")
     df = pd.read_csv("data/salaries.csv")
