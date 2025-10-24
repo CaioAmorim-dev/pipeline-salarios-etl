@@ -1,6 +1,27 @@
 import pandas as pd
+import os
 import numpy as np
 import plotly.express as px
+import streamlit as st
+
+@st.cache_data
+def carregar_dados(base_url: str, caminho_local: str):
+    try:
+        st.info("Baixando dados de internet")
+        df = pd.read_csv(base_url)
+        os.makedirs(os.path.dirname(caminho_local), exist_ok=True)
+        df.to_csv(caminho_local)
+        st.success("Dados carregados da internet e salvos localmente")
+        
+    except Exception as e:
+        st.warning(f"Erro ao carregar online: {e}")
+        if os.path.exists(caminho_local):
+            st.info("Carregando dados do cache local...")
+            df = pd.read_csv(caminho_local)
+        else:
+            st.error("nenhum cache encontrado.")
+            df = pd.DataFrame()
+    return df
 
 def carregar_dados_tratados(base_dados):
 
