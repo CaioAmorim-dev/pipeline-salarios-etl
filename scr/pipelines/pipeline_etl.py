@@ -75,7 +75,11 @@ def tratar_dados(df: pd.DataFrame) -> pd.DataFrame:
         # Criando coluna com situação salarial (desvio percentual)
         df["situacao_salario"] = ((df["usd"] - df["media_categoria"]) / df["media_categoria"] * 100).round(2)
 
-        df.to_csv("dados_tratados.csv", index=False)
+        # Garante que a pasta exista
+        os.makedirs("scr/data", exist_ok=True)
+
+        # Salva o CSV na pasta scr/data
+        df.to_csv("scr/data/dados_tratados.csv", index=False)
 
         return df
     else: 
