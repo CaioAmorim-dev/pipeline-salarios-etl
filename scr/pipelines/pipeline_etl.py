@@ -4,6 +4,7 @@ import numpy as np
 import plotly.express as px
 import streamlit as st
 
+# Carregamento de dados brutos
 @st.cache_data
 def carregar_dados(base_url: str, caminho_local: str):
     try:
@@ -23,6 +24,7 @@ def carregar_dados(base_url: str, caminho_local: str):
             df = pd.DataFrame()
     return df
 
+# Tratamentod de dados
 def tratar_dados(df: pd.DataFrame) -> pd.DataFrame:
     if not df.empty:
         
@@ -78,3 +80,9 @@ def tratar_dados(df: pd.DataFrame) -> pd.DataFrame:
         return df
     else: 
         return df
+    
+
+# Carregamnto de dados tratados
+def carregar_dados_tratados(base_url: str, caminho_local: str):
+    df = carregar_dados(base_url, caminho_local)
+    return tratar_dados(df)
