@@ -29,7 +29,7 @@ st.set_page_config(
 
 try:
     df = pipeline_etl.carregar_dados_tratados(
-        base_url="https://raw.githubusercontent.com/guilhermeonrails/data-jobs/refs/heads/main/salaries.csv",
+        base_url="https://raw.githubusercontent.com/CaioAmorim-dev/data-jobs/main/salaries.csv"
         caminho_local="scr/data/salarios.csv"
 )
 except Exception as e:
