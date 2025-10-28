@@ -3,6 +3,7 @@ import os
 import numpy as np
 import plotly.express as px
 import streamlit as st
+import pycountry as pc
 
 # Carregamento de dados brutos
 @st.cache_data
@@ -78,6 +79,9 @@ def tratar_dados(df: pd.DataFrame) -> pd.DataFrame:
         # Garante que a pasta exista
         os.makedirs("scr/data", exist_ok=True)
 
+        # Trata coluna Residencia 
+        df["residencia"] = df["residencia"].apply( lambda x: pc.countries.get(alpha_2=x).alpha_3 if pc.countries.get(alpha_2=x) else None)
+    
         # Salva o CSV na pasta scr/data
         df.to_csv("scr/data/dados_tratados.csv", index=False)
 
