@@ -29,7 +29,7 @@ st.set_page_config(
 
 try:
     df = pipeline_etl.carregar_dados_tratados(
-        base_url="https://raw.githubusercontent.com/CaioAmorim-dev/data-jobs/main/salaries.csv"
+        base_url="https://raw.githubusercontent.com/CaioAmorim-dev/data-jobs/main/salaries.csv",
         caminho_local="scr/data/salarios.csv"
 )
 except Exception as e:
@@ -142,33 +142,35 @@ with col_graf3:
 
 with col_graf4:
     if not df_selecionado.empty:
-        grafico_sunburst = px.sunburst(
+        grafico_box = px.box(
             df_selecionado,
-            path=["residencia_iso3", "cargo", "nivel_experiencia"],
-            values="usd",
-            color="usd",
-            color_continuous_scale="RdBu",
-            title="Hierarquia de países, cargos e senioridades",)
-        grafico_sunburst.update_layout(title_x=0.1)
-        st.plotly_chart(grafico_sunburst, use_container_width=True)
+            x="nivel_experiencia",
+            y="usd",
+            color="nivel_experiencia",
+            title="Distribuição salarial por nível de experiência",
+            labels={"usd": "Salário anual (USD)", "nivel_experiencia": "Senioridade"},
+            points="outliers"
+        )
+        grafico_box.update_layout(title_x=0.1, showlegend=False)
+        st.plotly_chart(grafico_box, use_container_width=True)
     else:
-        st.warning("Nenhum dado para exibir no gráfico de países")
+        st.warning("Nenhum dado para exibir no gráfico de distribuição por senioridade.")
 
 
-
-col_graf5 = st.columns(1)
+col_graf5 = st.columns(1)[0]
 with col_graf5:
     if not df_selecionado.empty:
             df_ds = df_selecionado [df_selecionado["cargo"] == "Data Scientist"]
-            media_ds_pais = df_ds.groupby("residencia_is03")["usd"].mean().reset_index
+            media_ds_pais = df_ds.groupby("residencia")["usd"].mean().reset_index()
             grafico_paises = px.choropleth(
                 media_ds_pais,
-                locations="residencia_iso3",
+                locations="residencia",
                 color="usd",
                 color_continuous_scale="rdylgn",
                 title="Salario médio de Cientista de dados por pais",
-                labels={"usd": "Salario médio (USD)", "resindeica_iso3": "País"})
+                labels={"usd": "Salario médio (USD)", "residencia": "País"},
+                locationmode= "ISO-3")
             grafico_paises.update_layout(title_x=0.1)
-            st.ploty_chart(grafico_paises, use_container_with=True)
+            st.plotly_chart(grafico_paises, use_container_with=True)
     else:
         st.warning("Nenhum dado para exibir no gráfico de países")
