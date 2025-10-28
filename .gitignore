@@ -7,3 +7,5 @@ __pycache__/
 
 # Dados gerados
 dados_tratados.csv
+scr\data\dados_tratados.csv
+

@@ -34,7 +34,7 @@ try:
 )
 except Exception as e:
     st.warning(f"Erro ao carregar dados online ({e}). Carregando backup local...")
-    df = pd.read_csv("data/salaries.csv")
+    df = pd.read_csv("data/salarios.csv")
 
 
 

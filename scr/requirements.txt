@@ -10,3 +10,6 @@ streamlit>=1.36.0
 
 # Suporte a manipulação de arquivos e HTTP 
 requests>=2.31.0
+
+# Decodificação de IOS-3
+pycountry==24.6.1
